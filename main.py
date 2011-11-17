@@ -4,13 +4,21 @@ import urllib2,hashlib,sqlite3,os.path
 WEB_DB_NAME = "web.db"
 
 def getWebHash(url):
-    content = urllib2.urlopen(url)
+    try:
+        content = urllib2.urlopen(url)
+    except urllib2.URLError:
+        return False
     return hashlib.md5(content.read()).hexdigest()
 
 def updateWebDB(url):
     if not os.path.exists(WEB_DB_NAME):
         makeTable()
     hash = getWebHash(url)
+    if hash == False:
+        print u"入力されたURLは恐らく無効なURLです"
+        print u"処理を中断します..."
+        return
+
     con = sqlite3.connect(WEB_DB_NAME,isolation_level=None)
     c = con.cursor()
     c.execute("select * from webpage where url='%s'" % url)
@@ -70,4 +78,3 @@ def makeTable():
 if __name__ == "__main__":
     updateWebDB("http://google.co.jp")
     dumpDB()
-    isUpdate("http://google.co.jp")
