@@ -48,7 +48,7 @@ class MainWindow(wx.Frame):
 
         self.btAddUrl = wx.Button(self,label=u"URLの追加")
         self.btDelUrl = wx.Button(self,label=u"URLの削除")
-        self.btCheck = wx.Button(self,label=u"フォルダ選択解除")
+        self.btCheck = wx.Button(self,label=u"更新確認")
         #self.buttonDelete = wx.Button(self,label=u"削除")
         self.sizer2.Add(self.btAddUrl,1,wx.EXPAND)
         self.sizer2.Add(self.btDelUrl,1,wx.EXPAND)
@@ -126,8 +126,25 @@ class MainWindow(wx.Frame):
         print "dclicked"
 
     def selectCheck(self,e):
-        dlg = ResultDialog.ResultDialog(self,-1)
-        dlg.ShowModal()
+        urlList = webdb.getUrlList()
+        updateUrlList = []
+        max = len(urlList)
+        dlg = wx.ProgressDialog(u"更新確認中...",u"進捗",maximum=max,parent=self,style=wx.PD_APP_MODAL
+                | wx.PD_REMAINING_TIME
+                )
+        keepGoing = True
+        count = 0
+        for url in urlList:
+            if webdb.isUpdate(url):
+                updateUrlList.append(url)
+            count +=1
+            keepGoing,skip = dlg.Update(count)
+
+        dlg.Close()
+        dlg.Destroy()
+        
+        dlg2 = ResultDialog.ResultDialog(self,-1,updateUrlList)
+        dlg2.Show()
     """
 
 
