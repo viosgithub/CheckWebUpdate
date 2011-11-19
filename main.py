@@ -2,7 +2,9 @@
 import wx
 import os
 import glob,shutil
+
 import webdb
+import ResultDialog
 
 
 class MainWindow(wx.Frame):
@@ -54,6 +56,7 @@ class MainWindow(wx.Frame):
         #self.sizer3.Add(self.buttonDelete,1,wx.EXPAND)
         self.btAddUrl.Bind(wx.EVT_BUTTON,self.selectAddUrl)
         self.btDelUrl.Bind(wx.EVT_BUTTON,self.selectDelUrl)
+        self.btCheck.Bind(wx.EVT_BUTTON,self.selectCheck)
         #self.buttonDelete.Bind(wx.EVT_BUTTON,self.selectDelete)
 
 
@@ -122,7 +125,13 @@ class MainWindow(wx.Frame):
         self.urlListBox.Refresh()
         print "dclicked"
 
+    def selectCheck(self,e):
+        dlg = ResultDialog.ResultDialog(self,-1)
+        dlg.ShowModal()
     """
+
+
+
     def selectDelete(self,e):
         global dirPath
         if dirPath is None : 
