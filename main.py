@@ -22,7 +22,7 @@ class MainWindow(wx.Frame):
 
         # Setting up the menu.
         filemenu= wx.Menu()
-        menuOpen = filemenu.Append(wx.ID_OPEN, "&Open\tCtrl+O"," Open a file to edit")
+        menuPaste = filemenu.Append(wx.ID_OPEN, u"URLを貼り付け\tCtrl+P",u" クリップボートからURLを登録するt")
         menuAbout= filemenu.Append(wx.ID_ABOUT, "&About"," Information about this program")
         menuExit = filemenu.Append(wx.ID_EXIT,"E&xit"," Terminate the program")
 
@@ -32,8 +32,10 @@ class MainWindow(wx.Frame):
         self.SetMenuBar(menuBar)  # Adding the MenuBar to the Frame content.
 
         # Events.
+        self.Bind(wx.EVT_MENU, self.selectAddClipUrl, menuPaste)
         self.Bind(wx.EVT_MENU, self.OnExit, menuExit)
         self.Bind(wx.EVT_MENU, self.OnAbout, menuAbout)
+        
 
         """
         dropTarget = dragdrop.FileDropTarget(self.urlListBox,self)
@@ -46,15 +48,17 @@ class MainWindow(wx.Frame):
         self.sizer2 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer3 = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.btAddUrl = wx.Button(self,label=u"URLの追加")
+        self.btAddUrl = wx.Button(self,label=u"URLの直接入力")
+        self.btAddClipUrl = wx.Button(self,label=u"クリップボートからURLを入力")
         self.btDelUrl = wx.Button(self,label=u"URLの削除")
         self.btCheck = wx.Button(self,label=u"更新確認")
         #self.buttonDelete = wx.Button(self,label=u"削除")
         self.sizer2.Add(self.btAddUrl,1,wx.EXPAND)
-        self.sizer2.Add(self.btDelUrl,1,wx.EXPAND)
+        self.sizer2.Add(self.btAddClipUrl,1,wx.EXPAND)
         self.sizer3.Add(self.btCheck,1,wx.EXPAND)
         #self.sizer3.Add(self.buttonDelete,1,wx.EXPAND)
         self.btAddUrl.Bind(wx.EVT_BUTTON,self.selectAddUrl)
+        self.btAddClipUrl.Bind(wx.EVT_BUTTON,self.selectAddClipUrl)
         self.btDelUrl.Bind(wx.EVT_BUTTON,self.selectDelUrl)
         self.btCheck.Bind(wx.EVT_BUTTON,self.selectCheck)
         #self.buttonDelete.Bind(wx.EVT_BUTTON,self.selectDelete)
@@ -63,6 +67,7 @@ class MainWindow(wx.Frame):
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.urlListBox, 1, wx.EXPAND)
         self.sizer.Add(self.sizer2, 0, wx.EXPAND)
+        self.sizer.Add(self.btDelUrl, 0, wx.EXPAND)
         self.sizer.Add(self.sizer3, 0, wx.EXPAND)
 
         #Layout sizers
@@ -113,6 +118,19 @@ class MainWindow(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             webdb.updateWebDB(dlg.GetValue())
             urlListBox.Set(webdb.getUrlList())
+
+    def selectAddClipUrl(self,e):
+        success = False
+        do = wx.TextDataObject()
+        if wx.TheClipboard.Open():
+            success = wx.TheClipboard.GetData(do)
+            wx.TheClipboard.Close()
+        if success:
+            webdb.updateWebDB(do.GetText())
+            urlListBox.Set(webdb.getUrlList())
+
+        else:
+            wx.MessageBox(u"エラー",u"クリップボードからURLを取得できませんでした")
 
     def selectDelUrl(self,e):
         delUrl = urlListBox.GetString(urlListBox.GetSelections()[0])
